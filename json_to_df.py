@@ -6,7 +6,7 @@ import os
 import pandas as pd
 
 
-class JSON_to_DF():
+class JsonToDF():
     ''' Converts JSON to DF '''
 
     def __init__(self, file_path):
@@ -53,13 +53,11 @@ class JSON_to_DF():
     
     def to_df(self):
         '''
-        Converts data to a pandas dataframe
-        
-        Args:
-            Data: self.data
-        
-        Return:
-            Df : Pandas Dataframe
+        Converts the JSON data into a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: The JSON data as a DataFrame 
+            with 'Tag', 'Patterns', and 'Responses' columns.
         '''
         # Convert the intents into a pandas DataFrame
         data = []
@@ -75,16 +73,27 @@ class JSON_to_DF():
 
         return self.df
     
-    def save_df(self, dir):
+    def save_df(self, filename, directory):
         '''
-        Saves df into the specified directory
+        Saves the DataFrame to a CSV file in the specified directory.
         
         Args:
-            dir: Directory to save dataframe
+            filename (str): Name of the output CSV file (without extension)
+            directory (str): Directory where the CSV should be saved
+        
+        Raises:
+            ValueError: If DataFrame is not created before saving
         '''
+        if not hasattr(self, 'df'):
+            raise ValueError("No DataFrame to save. Convert JSON to DataFrame first.")
+        
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        self.df.to_csv(os.path.join(directory, f"{filename}.csv"), index=False)
         
 if __name__ == '__main__':
     path = 'json/intents.json'
-    jsontodf = JSON_to_DF(path)
+    jsontodf = JsonToDF(path)
     df = jsontodf.to_df()
-    print(df.head())
+    jsontodf.save_df(filename='intents', directory='data')
