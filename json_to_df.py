@@ -66,3 +66,11 @@ class JSON_to_DF():
         self.df = pd.DataFrame(data, columns=['Tag', 'Patterns', 'Responses'])
 
         return self.df
+    
+    def save_df(self, dir):
+        '''
+        Saves df into the specified directory
+        
+        Args:
+            dir: Directory to save dataframe
+        '''
