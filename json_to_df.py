@@ -92,6 +92,28 @@ class JsonToDF():
 
         self.df.to_csv(os.path.join(directory, f"{filename}.csv"), index=False)
         
+    def load_df(self, filename, directory):
+        '''
+        Loads a DataFrame from a CSV file.
+        
+        Args:
+            filename (str): Name of the CSV file (without extension)
+            directory (str): Directory where the CSV file is located
+        
+        Returns:
+            pd.DataFrame: The loaded DataFrame
+        
+        Raises:
+            FileNotFoundError: If the specified CSV file is not found
+        '''
+        file_path = os.path.join(directory, f"{filename}.csv")
+        
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+        
+        self.df = pd.read_csv(file_path)
+        return self.df
+        
 if __name__ == '__main__':
     path = 'json/intents.json'
     jsontodf = JsonToDF(path)
