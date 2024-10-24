@@ -1,6 +1,8 @@
 import torch
 import pickle
+import pandas as pd
 from transformers import BertTokenizer
+import random
 
 # Global variables
 model = None
@@ -8,9 +10,10 @@ tokenizer = None
 tag_to_label = None
 label_to_tag = None
 device = None
+df = None
 
-def load_model(model_path='model/qa_model.pkl'):
-    global model, tokenizer, tag_to_label, label_to_tag, device
+def load_model(model_path='model/qa_model.pkl', data_path='data/intents.csv'):
+    global model, tokenizer, tag_to_label, label_to_tag, device, df
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
@@ -25,18 +28,26 @@ def load_model(model_path='model/qa_model.pkl'):
     # Load the tokenizer
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     
+    # Load the dataset
+    df = pd.read_csv(data_path)
+    
     model.to(device)
     model.eval()
 
-def predict_intent(question):
+def get_response(tag):
+    global df
+    responses = df[df['Tag'] == tag]['Responses'].values[0]
+    return random.choice(responses.split('|')) if '|' in responses else responses
+
+def predict_and_respond(question):
     """
-    Predicts an intent (question) and maps the prediction to a tag
+    Predicts an intent (question), maps the prediction to a tag, and provides a response
 
     Args:
         question (str): User input string
 
     Returns:
-        str: Predicted tag
+        tuple: Predicted tag and corresponding response
     """
     global model, tokenizer, label_to_tag, device
     
@@ -52,22 +63,26 @@ def predict_intent(question):
     predictions = torch.argmax(outputs.logits, dim=-1)
     predicted_tag = label_to_tag[predictions.item()]
     
-    return predicted_tag
+    # Get response for the predicted tag
+    response = get_response(predicted_tag)
+    
+    return predicted_tag, response
 
 if __name__ == '__main__':
     # Load the model
     load_model()
     
     # Main loop for user interaction
-    print("Intent Prediction System")
+    print("Q&A System")
     print("Type 'quit' to exit")
     
     while True:
-        question = input("\nEnter your question: ")
+        question = input("\nYou: ")
         if question.lower() == 'quit':
             break
         
-        predicted_tag = predict_intent(question)
-        print(f"Predicted Intent: {predicted_tag}")
+        predicted_tag, response = predict_and_respond(question)
+        print(f"Bot: {response}")
+        print(f"(Predicted Intent: {predicted_tag})")
 
-    print("Thank you for using the Intent Prediction System!")
+    print("Thank you for using the Q&A System!")
