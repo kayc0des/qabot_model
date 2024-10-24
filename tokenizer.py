@@ -17,4 +17,4 @@ def tokenize_data(data, tokenizer):
     num_labels = len(tag_to_label)
     labels = data['Tag'].map(tag_to_label).values
     
-    return encoded_data, labels, num_labels
+    return encoded_data, labels, num_labels, tag_to_label

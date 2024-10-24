@@ -1,5 +1,3 @@
-''' Create QADataset and DataLoader'''
-
 import torch
 import pandas as pd
 from transformers import BertTokenizer
@@ -8,24 +6,11 @@ from transformers import BertForSequenceClassification, AdamW
 import pickle
 
 tokenize_data = __import__('tokenizer').tokenize_data
+QADataset = __import__('qadataset').QADataset
 
 data_path = 'data/intents.csv'
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 df = pd.read_csv(data_path)
-
-
-class QADataset(Dataset):
-    def __init__(self, encodings, labels):
-        self.encodings = encodings
-        self.labels = labels
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx])
-        return item
 
 if __name__ == '__main__':
     encoded_data, labels, num_labels, tag_to_label = tokenize_data(df, tokenizer=tokenizer)
@@ -37,7 +22,7 @@ if __name__ == '__main__':
     model.to(device)
     model.train()
 
-    epochs = 1
+    epochs = 50
     for epoch in range(epochs):
         for batch in dataloader:
             # Move batch data to the device
@@ -68,4 +53,3 @@ if __name__ == '__main__':
     with open('model/qa_model.pkl', 'wb') as f:
         pickle.dump(model_data, f)
     print("Model saved successfully.")
-    
